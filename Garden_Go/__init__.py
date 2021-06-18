@@ -65,3 +65,28 @@ def login(user: schemas.UserLogin, authorize: AuthJWT = Depends(), db: Session =
         return token
     else:
         raise HTTPException(status_code=401, detail="Invalid Email or password")
+
+
+@app.post('/refresh')
+def refresh(authorize: AuthJWT = Depends()):
+    """
+    follow login response type and docs here (https://indominusbyte.github.io/fastapi-jwt-auth/usage/refresh/ )
+    """
+    raise NotImplementedError
+
+
+@app.get('/user')
+def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
+    """
+    get user from token follow https://indominusbyte.github.io
+    """
+    raise NotImplementedError
+
+
+@app.post('/species')
+def get_user(authorize: AuthJWT = Depends()):
+    """
+    1. write schema in schemas.py for response
+    2. Complete this
+    """
+    raise NotImplementedError
