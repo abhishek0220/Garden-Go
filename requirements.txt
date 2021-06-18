@@ -6,3 +6,4 @@ uvicorn
 sqlalchemy-cockroachdb
 psycopg2
 Pillow~=8.2.0
+fastapi-jwt-auth

@@ -14,7 +14,6 @@ class UserBase(BaseModel):
         orm_mode = True
 
 
-
 class UserCreate(UserBase):
     password: str
 
@@ -24,6 +23,21 @@ class UserCreate(UserBase):
             raise ValueError("Password too short")
         hashed_pw = md5(v.encode()).hexdigest()
         return hashed_pw
+
+
+class UserLogin(BaseModel):
+    email: str
+    password: str
+
+    @validator('password', pre=True)
+    def pw_creation(cls, v: str):
+        hashed_pw = md5(v.encode()).hexdigest()
+        return hashed_pw
+
+
+class TokenJWT(BaseModel):
+    access_token: str
+    refresh_token: str
 
 
 sample_user = {
