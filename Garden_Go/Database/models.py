@@ -2,12 +2,6 @@ from sqlalchemy import Column, ForeignKey, Integer, String, Table, DateTime
 from sqlalchemy.orm import relationship, Session, RelationshipProperty
 from Garden_Go.Database import Base
 
-user_plant_table = Table(
-    'user_plant_table', Base.metadata,
-    Column('users_id', Integer, ForeignKey('users.id')),
-    Column('plants_id', Integer, ForeignKey('plants.id'))
-)
-
 
 class User(Base):
     __tablename__ = "users"
@@ -33,3 +27,4 @@ class Plant(Base):
     name = Column(String)
     species = Column(String)
     common_species = Column(String)
+    image = Column(String)

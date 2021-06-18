@@ -7,6 +7,12 @@ from hashlib import md5
 class UserBase(BaseModel):
     email: str
     name: str
+    display_picture: str
+    score: int = 0
+
+    class Config:
+        orm_mode = True
+
 
 
 class UserCreate(UserBase):
@@ -24,5 +30,5 @@ sample_user = {
     "name": "Abhishek",
     "email": "2018ucs0087@iitjammu.ac.in",
     "password": "123456",
-    "dob": (20, 2, 2000)
+    "display_picture": "<b64_img>"
 }
