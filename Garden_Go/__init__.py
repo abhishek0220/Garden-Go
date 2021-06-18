@@ -84,9 +84,18 @@ def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
 
 
 @app.post('/species')
-def get_user(authorize: AuthJWT = Depends()):
+def get_species(authorize: AuthJWT = Depends()):
     """
-    1. write schema in schemas.py for response
+    1. write schema in schemas.py for response, request
     2. Complete this
+    """
+    raise NotImplementedError
+
+
+@app.post('/plantation')
+def plantation(authorize: AuthJWT = Depends()):
+    """
+    1. write schema in schemas.py for request, and rsponse
+    2. add plantation claim points
     """
     raise NotImplementedError
