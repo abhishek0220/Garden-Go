@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, validator
 from hashlib import md5
-
+from typing import List,Optional
 
 class UserBase(BaseModel):
     email: str
@@ -39,6 +39,17 @@ class TokenJWT(BaseModel):
     access_token: str
     refresh_token: str
 
+
+class PlantPred(BaseModel):
+    is_plant: bool
+    pred_prob: float
+    plant_name: str
+    common_names: Optional[List[str]]
+    species: str
+    # more info
+    url: str
+    description: str
+    score: int
 
 sample_user = {
     "name": "Abhishek",

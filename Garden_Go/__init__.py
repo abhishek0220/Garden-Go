@@ -11,6 +11,7 @@ import pprint
 from Garden_Go.Database import SessionLocal, engine
 from Garden_Go.Database import models
 from Garden_Go import crud, schemas
+from Garden_Go.utils.speciesNew import getSpecies,getSpeciesfromSrc,getScore
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -107,13 +108,37 @@ def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
 
 
 @app.post('/species')
-def get_species(authorize: AuthJWT = Depends()):
+async def get_species(request:Request ,authorize: AuthJWT = Depends()):
     """
-    1. write schema in schemas.py for response, request
-    2. Complete this
+    Get all the information about a plant image
     """
-    raise NotImplementedError
+    authorize.jwt_required()
 
+    try: 
+        image = await request.body() 
+        pred = getSpecies(image)
+        suggs = pred["suggestions"][0]
+
+        # Construct the response Model
+        resp = schemas.PlantPred()
+        resp.is_plant = pred.get("is_plant",False)
+
+        resp.pred_prob = suggs.get("probability", 0.0)
+        resp.plant_name = suggs.get("plant_name","")
+        resp.common_names = suggs["plant_details"].get("comman_names", [])
+        resp.species = suggs["plant_details"].get("scientific_name","")
+        resp.url = suggs["plant_details"].get("url","")
+        resp.description = suggs["plant_details"].get("wiki_description",{"value": ""}).get("value", "")
+        resp.score = getScore(resp.plant_name)
+
+        # print(resp)
+
+        return resp 
+
+    except Exception as e:
+        HTTPException("500",detail="Plant ID API Down")
+
+    return None
 
 @app.post('/plantation')
 def plantation(authorize: AuthJWT = Depends()):
