@@ -4,6 +4,7 @@ from pydantic import BaseModel, validator
 from hashlib import md5
 from typing import List,Optional
 
+
 class UserBase(BaseModel):
     email: str
     name: str
@@ -49,7 +50,12 @@ class PlantPred(BaseModel):
     # more info
     url: str
     description: str
-    score: int
+    # score: int
+
+
+class SpeciesReq(BaseModel):
+    image: str
+
 
 sample_user = {
     "name": "Abhishek",

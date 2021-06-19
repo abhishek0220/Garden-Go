@@ -5,9 +5,9 @@ import json
 API_KEY = os.getenv("PLANT_ID_KEY")
 
 
-def identifyPlant(encdImg):
-    images = [encdImg]
-    # images.append(encdImg)
+def identify_plant(enc_img):
+    images = [enc_img]
+    # images.append(enc_img)
     # see the docs for more optional attributes
     # https://github.com/Plant-id/Plant-id-API/wiki/Plant-details
     params = {
@@ -15,44 +15,48 @@ def identifyPlant(encdImg):
         "images": images,
         "modifiers": ["crops_fast"],
         "plant_language": "en",
-        "plant_details": ["common_names",
-                          "edible_parts",
-                          "name_authority",
-                          "propagation_methods",
-                          "taxonomy",
-                          "url",
-                          "wiki_description",
-                          "wiki_image"
-                         ],
-        }
+        "plant_details": [
+            "common_names",
+            "edible_parts",
+            "name_authority",
+            "propagation_methods",
+            "taxonomy",
+            "url",
+            "wiki_description",
+            "wiki_image"
+        ]
+    }
 
     headers = {
         "Content-Type": "application/json"
-        }
+    }
 
-    response = requests.post("https://api.plant.id/v2/identify",
-                             json=params,
-                             headers=headers)
-    print(response)
-    print("##############################")
+    response = requests.post(
+        "https://api.plant.id/v2/identify",
+        json=params,
+        headers=headers
+    )
+    # print(response)
+    # print("##############################")
     return response.json()
 
 
-def getSpeciesfromSrc(imgSrc: str):
-    with open(imgSrc,"rb") as imgFile:
-        imgEncd = base64.b64encode(imgFile.read()).decode("ascii")
-    return identifyPlant(imgEncd)
+def get_species_from_src(img_src: str):
+    with open(img_src, "rb") as imgFile:
+        img_enc = base64.b64encode(imgFile.read()).decode("ascii")
+    return identify_plant(img_enc)
 
 
-def getSpecies(imgraw: bytes):
-    imgEncd = base64.b64encode(imgraw).decode("ascii")
-    return identifyPlant(imgEncd)
+def get_species(img_raw: bytes):
+    img_enc = base64.b64encode(img_raw).decode("ascii")
+    return identify_plant(img_enc)
 
 
-def getScore(speciesName: str):
+def get_score(species_name: str):
     # Make a points based system later.
     return 5
 
+
 if __name__ == '__main__':
-    val = getSpeciesfromSrc("./pic1.jpeg")
+    val = get_species_from_src("./pic1.jpeg")
     print(json.dumps(val))

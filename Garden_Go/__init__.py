@@ -11,7 +11,7 @@ import pprint
 from Garden_Go.Database import SessionLocal, engine
 from Garden_Go.Database import models
 from Garden_Go import crud, schemas
-from Garden_Go.utils.speciesNew import getSpecies,getSpeciesfromSrc,getScore
+from Garden_Go.utils.speciesNew import identify_plant
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -108,43 +108,60 @@ def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
 
 
 @app.post('/species')
-async def get_species(request:Request ,authorize: AuthJWT = Depends()):
+async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
     """
     Get all the information about a plant image
     """
     authorize.jwt_required()
 
-    try: 
-        image = await request.body() 
-        pred = getSpecies(image)
-        suggs = pred["suggestions"][0]
+    resp = {
+        "is_plant": True,
+        "pred_prob": 0.5240204113016891,
+        "plant_name": "Spathiphyllum",
+        "common_names": [
+            "spath",
+            "peace lilies"
+        ],
+        "species": "Spathiphyllum",
+        "url": "https://en.wikipedia.org/wiki/Spathiphyllum",
+        "description": "Spathiphyllum is a genus of about 47 species of monocotyledonous flowering plants in the family Araceae, native to tropical regions of the Americas and southeastern Asia. Certain species of Spathiphyllum are commonly known as spath or peace lilies.\nThey are evergreen herbaceous perennial plants with large leaves 12–65 cm long and 3–25 cm broad. The flowers are produced in a spadix, surrounded by a 10–30 cm long, white, yellowish, or greenish spathe. The plant does not need large amounts of light or water to survive."
+    }
+
+    '''
+    try:
+        # image = await request.body()
+        pred = identify_plant(img_req.image)
+        print(pred, "=========================================")
+        suggested = pred["suggestions"][0]
 
         # Construct the response Model
-        resp = schemas.PlantPred()
-        resp.is_plant = pred.get("is_plant",False)
-
-        resp.pred_prob = suggs.get("probability", 0.0)
-        resp.plant_name = suggs.get("plant_name","")
-        resp.common_names = suggs["plant_details"].get("comman_names", [])
-        resp.species = suggs["plant_details"].get("scientific_name","")
-        resp.url = suggs["plant_details"].get("url","")
-        resp.description = suggs["plant_details"].get("wiki_description",{"value": ""}).get("value", "")
-        resp.score = getScore(resp.plant_name)
-
+        resp = schemas.PlantPred.construct(
+            is_plant=pred.get("is_plant", False),
+            pred_prob=suggested.get("probability", 0.0),
+            plant_name=suggested.get("plant_name", ""),
+            common_names=suggested["plant_details"].get("common_names", []),
+            species=suggested["plant_details"].get("scientific_name", ""),
+            url=suggested["plant_details"].get("url", ""),
+            description=suggested["plant_details"].get(
+                "wiki_description", {"value": ""}
+            ).get("value", "")
+        )
+        # score = getScore(resp.plant_name)
         # print(resp)
-
         return resp 
 
     except Exception as e:
-        HTTPException("500",detail="Plant ID API Down")
+        HTTPException(500, detail=f"Plant ID API Down {e}")
 
     return None
+    '''
+    return schemas.PlantPred(**resp)
 
 
 @app.post('/plantation')
 def plantation(authorize: AuthJWT = Depends()):
     """
-    1. write schema in schemas.py for request, and rsponse
+    1. write schema in schemas.py for request, and response
     2. add plantation claim points
     """
     raise NotImplementedError
