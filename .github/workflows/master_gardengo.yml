@@ -16,7 +16,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
+    - name: 'Create Env File'
+      run: 'echo "$ENV_STR" > .env'
+      shell: bash
+      env:
+        ENV_STR: ${{secrets.ENV_FILE}}
     - name: Set up Python version
       uses: actions/setup-python@v1
       with:
