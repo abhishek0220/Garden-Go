@@ -62,7 +62,7 @@ def login(user: schemas.UserLogin, authorize: AuthJWT = Depends(), db: Session =
     db_user = crud.get_user_by_email(db, user.email)
     if db_user and db_user.password == user.password:
         token = schemas.TokenJWT.construct(
-            access_token=authorize.create_access_token(subject=user.email),
+            access_token=authorize.create_access_token(subject=user.email, expires_time=False),
             refresh_token=authorize.create_refresh_token(subject=user.email)
         )
         return token
@@ -139,6 +139,7 @@ async def get_species(request:Request ,authorize: AuthJWT = Depends()):
         HTTPException("500",detail="Plant ID API Down")
 
     return None
+
 
 @app.post('/plantation')
 def plantation(authorize: AuthJWT = Depends()):
