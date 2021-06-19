@@ -28,3 +28,5 @@ class Plant(Base):
     species = Column(String)
     common_species = Column(String)
     image = Column(String)
+    description = Column(String)
+    score = Column(Integer)
