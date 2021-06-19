@@ -21,11 +21,15 @@ jobs:
       shell: bash
       env:
         ENV_STR: ${{secrets.ENV_FILE}}
+    - name: 'Create Google Token File'
+      run: 'echo "$GCP" > key.json'
+      shell: bash
+      env:
+        GCP: ${{secrets.GCP}}
     - name: Set up Python version
       uses: actions/setup-python@v1
       with:
         python-version: '3.8'
-
     - name: Create and start virtual environment
       run: |
         python -m venv venv

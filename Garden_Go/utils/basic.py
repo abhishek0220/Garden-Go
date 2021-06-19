@@ -6,9 +6,10 @@ import uuid
 import os
 from Garden_Go.utils.cloud_storage import CloudStorage
 
+cloud_storage = CloudStorage()
+
 
 def upload_user_image(user: schemas.UserCreate) -> str:
-    cloud_storage = CloudStorage()
     image_data = bytes(user.display_picture, encoding="ascii")
     im = Image.open(BytesIO(base64.b64decode(image_data)))
     tmp_name = ''.join(user.name.split()).lower()[:8]
