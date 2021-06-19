@@ -16,3 +16,9 @@ def create_user(db: Session, user: schemas.UserCreate) -> models.User:
     db_user = models.User(**user.dict())
     db_user.save_to_db(db)
     return db_user
+
+
+def delete_user(db: Session, user: models.User):
+    basic.del_user_image(user)
+    db.delete(user)
+    db.commit()

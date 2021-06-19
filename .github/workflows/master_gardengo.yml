@@ -22,15 +22,14 @@ jobs:
       env:
         ENV_STR: ${{secrets.ENV_FILE}}
     - name: 'Create Google Token File'
-      run: 'echo "$GCP" > gardenAPI.json'
+      run: 'echo "$GCP" > key.json'
       shell: bash
       env:
         GCP: ${{secrets.GCP}}
     - name: Set up Python version
       uses: actions/setup-python@v1
       with:
-        python-version: '3.7'
-
+        python-version: '3.8'
     - name: Create and start virtual environment
       run: |
         python -m venv venv
@@ -68,4 +67,4 @@ jobs:
         with:
           app-name: 'gardengo'
           slot-name: 'production'
-          publish-profile: ${{ secrets.AzureAppService_PublishProfile_2a39dc5f5c9f464f86f6241cf1e479c8 }}
+          publish-profile: ${{ secrets.AzureAppService_PublishProfile_03cbf7d7901d4595846797941454c9e0 }}

@@ -2,9 +2,11 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from typing import Generator
 from sqlalchemy.orm import Session
+from sqlalchemy import inspect
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from pydantic import BaseModel
+import pprint
 
 from Garden_Go.Database import SessionLocal, engine
 from Garden_Go.Database import models
@@ -79,25 +81,29 @@ def refresh(authorize: AuthJWT = Depends()):
     return {"access_token":new_access_token}
 
 
-@app.get('/user')
+@app.get('/user', response_model=schemas.UserBase)
 def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     """
     get user from token follow https://indominusbyte.github.io
     """
     authorize.jwt_required()
     current_user = authorize.get_jwt_subject()
-    user_db = db.query(models.User).filter(models.User.name == current_user).first()
+    user_db: models.User = db.query(models.User).filter(models.User.email == current_user).first()
     if user_db is None:
         raise HTTPException(status_code=500, detail="Bug in Database")
-    
-    # Create UserBase Response
-    user = schemas.UserBase()
-    user.email = user_db.email
-    user.name = user_db.name
-    user.display_picture = user_db.display_picture
-    user.score = user_db.score
-
+    user = schemas.UserBase.from_orm(user_db)
     return user
+
+
+@app.delete('/user')
+def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
+    authorize.jwt_required()
+    current_user = authorize.get_jwt_subject()
+    user_db: models.User = crud.get_user_by_email(db, current_user)
+    if user_db is None:
+        raise HTTPException(status_code=500, detail="Bug in Database")
+    crud.delete_user(db, user_db)
+    return {"msg": "User Deleted Successfully"}
 
 
 @app.post('/species')
