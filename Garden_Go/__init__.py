@@ -72,7 +72,11 @@ def refresh(authorize: AuthJWT = Depends()):
     """
     follow login response type and docs here (https://indominusbyte.github.io/fastapi-jwt-auth/usage/refresh/ )
     """
-    raise NotImplementedError
+    authorize.jwt_refresh_token_required()
+    current_user = authorize.get_jwt_subject()
+    new_access_token = authorize.create_access_token(current_user)
+    # No way to get the refresh token here.
+    return {"access_token":new_access_token}
 
 
 @app.get('/user')
@@ -80,7 +84,20 @@ def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     """
     get user from token follow https://indominusbyte.github.io
     """
-    raise NotImplementedError
+    authorize.jwt_required()
+    current_user = authorize.get_jwt_subject()
+    user_db = db.query(models.User).filter(models.User.name == current_user).first()
+    if user_db is None:
+        raise HTTPException(status_code=500, detail="Bug in Database")
+    
+    # Create UserBase Response
+    user = schemas.UserBase()
+    user.email = user_db.email
+    user.name = user_db.name
+    user.display_picture = user_db.display_picture
+    user.score = user_db.score
+
+    return user
 
 
 @app.post('/species')
