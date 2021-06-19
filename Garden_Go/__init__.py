@@ -1,3 +1,5 @@
+from io import BytesIO
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from typing import Generator
@@ -12,6 +14,7 @@ from Garden_Go import crud, schemas
 from Garden_Go.utils.speciesNew import identify_plant, get_species_from_src, get_score
 from Garden_Go.utils.faceVerifier import FaceVerifier
 from Garden_Go.utils.basic import save_image_local, cloud_storage
+from Garden_Go.utils.garbagePredictor import gp
 
 import base64
 import uuid
@@ -208,3 +211,15 @@ def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), autho
 
     os.remove(file_loc)
     return resp
+
+
+@app.post('/classify')
+def classify(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
+    """
+    Is item recyclable
+    """
+    authorize.jwt_required()
+    bytes_img = BytesIO(base64.b64decode(img_req.image))
+    return {
+        'result': gp.classify(bytes_img)
+    }
