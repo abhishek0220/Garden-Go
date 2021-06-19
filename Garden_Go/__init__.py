@@ -95,6 +95,17 @@ def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     return user
 
 
+@app.delete('/user')
+def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
+    authorize.jwt_required()
+    current_user = authorize.get_jwt_subject()
+    user_db: models.User = crud.get_user_by_email(db, current_user)
+    if user_db is None:
+        raise HTTPException(status_code=500, detail="Bug in Database")
+    crud.delete_user(db, user_db)
+    return {"msg": "User Deleted Successfully"}
+
+
 @app.post('/species')
 def get_species(authorize: AuthJWT = Depends()):
     """
