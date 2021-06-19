@@ -1,7 +1,9 @@
 import os
 from google.cloud import storage
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/home/gardenAPI.json'
+if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = os.path.join(os.getcwd(), 'gardenAPI.json')
+
 BUCKET_NAME = 'garden-storage'
 
 
