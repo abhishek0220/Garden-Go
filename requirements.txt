@@ -11,3 +11,4 @@ azure-cognitiveservices-vision-face
 google-cloud-storage
 requests~=2.25.1
 msrest~=0.6.21
+azure-cognitiveservices-vision-customvision
