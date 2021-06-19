@@ -2,8 +2,9 @@ fastapi~=0.65.2
 SQLAlchemy~=1.4.18
 pydantic~=1.8.2
 python-dotenv~=0.17.1
-uvicorn
+uvicorn~=0.14.0
 sqlalchemy-cockroachdb
 psycopg2
 Pillow~=8.2.0
 fastapi-jwt-auth
+azure-cognitiveservices-vision-face
