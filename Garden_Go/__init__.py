@@ -88,17 +88,10 @@ def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     """
     authorize.jwt_required()
     current_user = authorize.get_jwt_subject()
-    user_db = db.query(models.User).filter(models.User.email == current_user).first()
+    user_db: models.User = db.query(models.User).filter(models.User.email == current_user).first()
     if user_db is None:
         raise HTTPException(status_code=500, detail="Bug in Database")
-    
-    # Create UserBase Response
-    user = schemas.UserBase.construct(
-        email=user_db.email,
-        name=user_db.name,
-        display_picture=user_db.display_picture,
-        score=user_db.score
-    )
+    user = schemas.UserBase.from_orm(user_db)
     return user
 
 
