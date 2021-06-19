@@ -24,12 +24,16 @@ class FaceVerifier:
     
     def get_face_id(self):
         image = open(self.img1Path, 'r+b')
-        faces = self.faceClient.face.detect_with_stream(image, detection_model='detection_03')
+        faces = self.faceClient.face.detect_with_stream(image, detection_model='detection_03', face_id_time_to_live=100)
         return faces[0].face_id
     
     def is_face_same(self):
         multi_image_name = os.path.basename(self.img2Url)
-        detected_faces2 = self.faceClient.face.detect_with_url(url=self.img2Url, detection_model='detection_03')
+        detected_faces2 = self.faceClient.face.detect_with_url(
+            url=self.img2Url,
+            detection_model='detection_03',
+            face_id_time_to_live=100
+        )
         second_image_face_id = list(map(lambda x: x.face_id, detected_faces2))
         first_image_face_id = self.get_face_id()
         similar_faces = self.faceClient.face.find_similar(face_id=first_image_face_id, face_ids=second_image_face_id)

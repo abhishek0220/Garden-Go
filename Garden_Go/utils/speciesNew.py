@@ -2,6 +2,7 @@ import base64
 import requests
 import os 
 import json
+from Garden_Go.Database import models
 API_KEY = os.getenv("PLANT_ID_KEY")
 
 
@@ -10,6 +11,11 @@ def identify_plant(enc_img):
     # images.append(enc_img)
     # see the docs for more optional attributes
     # https://github.com/Plant-id/Plant-id-API/wiki/Plant-details
+    f = open("message.json",'r')
+    a = f.read()
+    f.close()
+    return json.loads(a)
+
     params = {
         "api_key": API_KEY,
         "images": images,
@@ -52,9 +58,17 @@ def get_species(img_raw: bytes):
     return identify_plant(img_enc)
 
 
-def get_score(species_name: str):
+def get_score(species_name: str, user: models.User):
     # Make a points based system later.
-    return 5
+    found = False
+    for i in user.plants:
+        print(i.species)
+        if i.species == species_name:
+            found = True
+            break
+    if found:
+        return 10
+    return 50
 
 
 if __name__ == '__main__':

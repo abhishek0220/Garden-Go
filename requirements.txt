@@ -9,3 +9,5 @@ Pillow~=8.2.0
 fastapi-jwt-auth
 azure-cognitiveservices-vision-face
 google-cloud-storage
+requests~=2.25.1
+msrest~=0.6.21

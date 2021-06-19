@@ -2,16 +2,20 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 from typing import Generator
 from sqlalchemy.orm import Session
-from sqlalchemy import inspect
 from fastapi_jwt_auth import AuthJWT
 from fastapi_jwt_auth.exceptions import AuthJWTException
 from pydantic import BaseModel
-import pprint
 
 from Garden_Go.Database import SessionLocal, engine
 from Garden_Go.Database import models
 from Garden_Go import crud, schemas
-from Garden_Go.utils.speciesNew import identify_plant
+from Garden_Go.utils.speciesNew import identify_plant, get_species_from_src, get_score
+from Garden_Go.utils.faceVerifier import FaceVerifier
+from Garden_Go.utils.basic import save_image_local, cloud_storage
+
+import base64
+import uuid
+import os
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -106,15 +110,7 @@ def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     crud.delete_user(db, user_db)
     return {"msg": "User Deleted Successfully"}
 
-
-@app.post('/species')
-async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
-    """
-    Get all the information about a plant image
-    """
-    authorize.jwt_required()
-
-    resp = {
+resp_plantation = {
         "is_plant": True,
         "pred_prob": 0.5240204113016891,
         "plant_name": "Spathiphyllum",
@@ -125,13 +121,19 @@ async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends(
         "species": "Spathiphyllum",
         "url": "https://en.wikipedia.org/wiki/Spathiphyllum",
         "description": "Spathiphyllum is a genus of about 47 species of monocotyledonous flowering plants in the family Araceae, native to tropical regions of the Americas and southeastern Asia. Certain species of Spathiphyllum are commonly known as spath or peace lilies.\nThey are evergreen herbaceous perennial plants with large leaves 12–65 cm long and 3–25 cm broad. The flowers are produced in a spadix, surrounded by a 10–30 cm long, white, yellowish, or greenish spathe. The plant does not need large amounts of light or water to survive."
-    }
+}
 
-    '''
+
+@app.post('/species')
+async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
+    """
+    Get all the information about a plant image
+    """
+    authorize.jwt_required()
     try:
         # image = await request.body()
         pred = identify_plant(img_req.image)
-        print(pred, "=========================================")
+        # print(pred, "=========================================")
         suggested = pred["suggestions"][0]
 
         # Construct the response Model
@@ -151,17 +153,58 @@ async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends(
         return resp 
 
     except Exception as e:
-        HTTPException(500, detail=f"Plant ID API Down {e}")
-
-    return None
-    '''
-    return schemas.PlantPred(**resp)
+        return HTTPException(500, detail=f"Plant ID API Down {e}")
 
 
 @app.post('/plantation')
-def plantation(authorize: AuthJWT = Depends()):
+def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), authorize: AuthJWT = Depends()):
     """
-    1. write schema in schemas.py for request, and response
-    2. add plantation claim points
+    Get points by uploading the image of plant you planted
+    The image should contain your face (showing you and your plant in one image)
     """
-    raise NotImplementedError
+    authorize.jwt_required()
+    image = img_req.image
+    current_user_email = authorize.get_jwt_subject()
+    user_db: models.User = crud.get_user_by_email(db, current_user_email)
+    loc = f'plantation_img_{uuid.uuid4()}.jpg'
+    file_loc = save_image_local(loc, image)
+    is_match = FaceVerifier(file_loc, user_db.display_picture).is_face_same()
+    if is_match is not True:
+
+        resp = {
+            'score': 0,
+            'msg': 'Face can`t be verified'
+        }
+    else:
+        try:
+            pred = identify_plant(image)
+            suggested = pred["suggestions"][0]
+            plant_name = suggested.get("plant_name", "")
+            common_names = suggested["plant_details"].get("common_names", [''])[0]
+            species = suggested["plant_details"]["scientific_name"]
+            description = suggested["plant_details"].get(
+                "wiki_description", {"value": ""}
+            ).get("value", "")
+            public_link = cloud_storage.upload(file_loc, loc)
+            scores = get_score(species, user_db)
+            plant = models.Plant(
+                name=plant_name,
+                species=species,
+                common_species=common_names,
+                image=public_link,
+                description=description,
+                score=scores
+            )
+            user_db.plants.append(plant)
+            user_db.score = user_db.score + scores
+            user_db.save_to_db(db)
+            resp = {
+                'score': scores,
+                'msg': f'you claimed {scores} points'
+            }
+        except Exception as e:
+            cloud_storage.delete(loc)
+            resp = HTTPException(500, detail=f"Something went wrong {e}")
+
+    os.remove(file_loc)
+    return resp
