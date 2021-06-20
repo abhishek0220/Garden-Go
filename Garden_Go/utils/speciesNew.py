@@ -11,11 +11,6 @@ def identify_plant(enc_img):
     # images.append(enc_img)
     # see the docs for more optional attributes
     # https://github.com/Plant-id/Plant-id-API/wiki/Plant-details
-    f = open("message.json",'r')
-    a = f.read()
-    f.close()
-    return json.loads(a)
-
     params = {
         "api_key": API_KEY,
         "images": images,
