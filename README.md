@@ -19,13 +19,16 @@ Remember the craze, when the Pokemon Go first launched for our mobiles. We spend
 
 ## Technology stack
 
-- Python 3.7
-- FastAPI
+- Backend: FastAPI
+- Frontend: Flutter
 - Running on: Azure App Service
 - Media Storage: Google Cloud Storage
 - Database: Cockroach DB
 - Deployment : GitHub Actions
 - APIs: Plant.id, Azure Cognitive Services
 
+#### Link to frontend Repo: [https://github.com/ParwaanVirk/GardenGoFrontend](https://github.com/ParwaanVirk/GardenGoFrontend)
+
 ## API Documentation
 API Specification can be found [here](https://gardengo.azurewebsites.net/docs)
+
