@@ -57,6 +57,19 @@ class SpeciesReq(BaseModel):
     image: str
 
 
+class GarbageResp(BaseModel):
+    result: str
+
+
+class PlantationResp(BaseModel):
+    score: int
+    msg: str
+
+
+class SchemasMsg(BaseModel):
+    msg: str
+
+
 sample_user = {
     "name": "Abhishek",
     "email": "2018ucs0087@iitjammu.ac.in",

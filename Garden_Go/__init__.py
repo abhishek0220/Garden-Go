@@ -103,7 +103,7 @@ def get_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     return user
 
 
-@app.delete('/user')
+@app.delete('/user', response_model=schemas.SchemasMsg)
 def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     authorize.jwt_required()
     current_user = authorize.get_jwt_subject()
@@ -111,23 +111,10 @@ def del_user(authorize: AuthJWT = Depends(), db: Session = Depends(get_db)):
     if user_db is None:
         raise HTTPException(status_code=500, detail="Bug in Database")
     crud.delete_user(db, user_db)
-    return {"msg": "User Deleted Successfully"}
-
-resp_plantation = {
-        "is_plant": True,
-        "pred_prob": 0.5240204113016891,
-        "plant_name": "Spathiphyllum",
-        "common_names": [
-            "spath",
-            "peace lilies"
-        ],
-        "species": "Spathiphyllum",
-        "url": "https://en.wikipedia.org/wiki/Spathiphyllum",
-        "description": "Spathiphyllum is a genus of about 47 species of monocotyledonous flowering plants in the family Araceae, native to tropical regions of the Americas and southeastern Asia. Certain species of Spathiphyllum are commonly known as spath or peace lilies.\nThey are evergreen herbaceous perennial plants with large leaves 12–65 cm long and 3–25 cm broad. The flowers are produced in a spadix, surrounded by a 10–30 cm long, white, yellowish, or greenish spathe. The plant does not need large amounts of light or water to survive."
-}
+    return schemas.SchemasMsg(msg="User Deleted Successfully")
 
 
-@app.post('/species')
+@app.post('/species', response_model=schemas.PlantPred)
 async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
     """
     Get all the information about a plant image
@@ -159,7 +146,7 @@ async def get_species(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends(
         return HTTPException(500, detail=f"Plant ID API Down {e}")
 
 
-@app.post('/plantation')
+@app.post('/plantation', response_model=schemas.PlantationResp)
 def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), authorize: AuthJWT = Depends()):
     """
     Get points by uploading the image of plant you planted
@@ -173,11 +160,10 @@ def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), autho
     file_loc = save_image_local(loc, image)
     is_match = FaceVerifier(file_loc, user_db.display_picture).is_face_same()
     if is_match is not True:
-
-        resp = {
-            'score': 0,
-            'msg': 'Face can`t be verified'
-        }
+        resp = schemas.PlantationResp.construct(
+            score=0,
+            msg='Face can`t be verified'
+        )
     else:
         try:
             pred = identify_plant(image)
@@ -201,10 +187,10 @@ def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), autho
             user_db.plants.append(plant)
             user_db.score = user_db.score + scores
             user_db.save_to_db(db)
-            resp = {
-                'score': scores,
-                'msg': f'you claimed {scores} points'
-            }
+            resp = schemas.PlantationResp.construct(
+                score=scores,
+                msg=f'you claimed {scores} points'
+            )
         except Exception as e:
             cloud_storage.delete(loc)
             resp = HTTPException(500, detail=f"Something went wrong {e}")
@@ -213,13 +199,13 @@ def plantation(img_req: schemas.SpeciesReq, db: Session = Depends(get_db), autho
     return resp
 
 
-@app.post('/classify')
+@app.post('/classify', response_model=schemas.GarbageResp)
 def classify(img_req: schemas.SpeciesReq, authorize: AuthJWT = Depends()):
     """
     Is item recyclable
     """
     authorize.jwt_required()
     bytes_img = BytesIO(base64.b64decode(img_req.image))
-    return {
-        'result': gp.classify(bytes_img)
-    }
+    return schemas.GarbageResp.construct(
+        result=gp.classify(bytes_img)
+    )
