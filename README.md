@@ -4,6 +4,8 @@
 
 _Part of MLH [Garden Hacks](https://gardenhacks.devpost.com/) 2021_
 
+**Update:** Got overall 3rd position 
+
 ![Home Page](https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/001/568/411/datas/gallery.jpg)
 
 Remember the craze, when the Pokemon Go first launched for our mobiles. We spend our days all around catching pokemons and earning points. Keeping the craze alive we launch our all new Garden-Go where instead of catching pokemons we need to capture new plant species ( which you do by planting them). The more you plant the more points you get. Let the plantation drive begins!! .
