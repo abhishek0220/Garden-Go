@@ -29,6 +29,4 @@ Remember the craze, when the Pokemon Go first launched for our mobiles. We spend
 
 #### Link to frontend Repo: [https://github.com/ParwaanVirk/GardenGoFrontend](https://github.com/ParwaanVirk/GardenGoFrontend)
 
-## API Documentation
-API Specification can be found [here](https://gardengo.azurewebsites.net/docs)
 
